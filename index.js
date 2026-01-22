@@ -1,20 +1,34 @@
+require('dotenv').config();
+
 const express = require('express');
-const app = express();
-const PORT = 3000;
+const mongoose = require('mongoose');
+const seedDatabase = require('./seedData');
 
-// Middleware
-app.use(express.json());
+const server = express();
+const PORT = process.env.PORT || 3001;
+const DB = process.env.MONGODB_URI;
 
-// Routes
-app.get('/', (req, res) => {
-  res.json({ message: 'ERP & RBAC System API is running' });
-});
+// Import app (routes + sessions + passport)
+const app = require('./app');
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'Server is healthy' });
-});
+// Attach app middleware
+server.use(app);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// MongoDB connection + server start
+(async () => {
+  try {
+    await mongoose.connect(DB);
+    console.log('✅ Successfully connected to MongoDB');
+
+    // Seed database (only if empty)
+    await seedDatabase();
+
+    server.listen(PORT, () => {
+      console.log(`🚀 Server listening on port ${PORT}`);
+    });
+
+  } catch (error) {
+    console.error('❌ MongoDB connection failed:', error);
+    process.exit(1); // stop server if DB fails
+  }
+})();
