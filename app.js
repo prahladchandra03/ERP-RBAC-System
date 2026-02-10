@@ -22,17 +22,7 @@ const app = express();
 
 /* ---------------- MIDDLEWARE ---------------- */
 
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:7501',
-    'https://roxylius.github.io/AdminControl-RBAC',
-    
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE']
-}));
+app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
@@ -40,8 +30,11 @@ app.use(express.json());
 /* ---------------- SESSION STORE (FIXED) ---------------- */
 
 const store = new MongoDBStore({
-  uri: process.env.MONGODB_URI,          // ✅ FIX HERE
-  collection: 'sessions'                 // simple & safe
+  uri: process.env.MONGO_URI,          // ✅ FIX HERE
+  collection: 'sessions',                // simple & safe
+  // connectionOptions: {
+  //    // Force IPv4 to fix querySrv ECONNREFUSED
+  // }
 });
 
 store.on('error', (error) => {
